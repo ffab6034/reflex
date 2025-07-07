@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReflexTap - Home</title>
     <link rel="stylesheet" href="home.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="home-container" id="main-content">
@@ -30,9 +32,21 @@
         </div>
         <div id="screen-deposit" style="display:none;">
             <h1>Deposit</h1>
-            <div style="margin-top:2rem;">
-                <p>Deposit functionality coming soon!</p>
+            <div class="plans">
+                <div class="plan-card" onclick="depositAmount(49)">
+                    <div class="plan-amount">₹49</div>
+                    <div class="plan-desc">Starter Plan</div>
+                </div>
+                <div class="plan-card" onclick="depositAmount(99)">
+                    <div class="plan-amount">₹99</div>
+                    <div class="plan-desc">Pro Plan</div>
+                </div>
+                <div class="plan-card" onclick="depositAmount(149)">
+                    <div class="plan-amount">₹149</div>
+                    <div class="plan-desc">Elite Plan</div>
+                </div>
             </div>
+            <div id="deposit-message" style="margin-top:1.2rem;text-align:center;color:#38a169;"></div>
         </div>
         <div id="screen-profile" style="display:none;">
             <h1>Profile</h1>
@@ -92,6 +106,32 @@
                 document.getElementById('profile-info').textContent = "Profile not available.";
             }
         }
+        function depositAmount(amount) {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                document.getElementById('deposit-message').style.color = "#e53e3e";
+                document.getElementById('deposit-message').textContent = "Please login first.";
+                return;
+            }
+            document.getElementById('deposit-message').style.color = "#764ba2";
+            document.getElementById('deposit-message').textContent = "Processing...";
+            const db = firebase.firestore();
+            const userRef = db.collection('logins').doc(userId);
+            userRef.get().then(doc => {
+                let balance = 0;
+                if (doc.exists && doc.data().balance) {
+                    balance = doc.data().balance;
+                }
+                return userRef.update({ balance: balance + amount });
+            }).then(() => {
+                document.getElementById('deposit-message').style.color = "#38a169";
+                document.getElementById('deposit-message').textContent = `₹${amount} added to your balance!`;
+            }).catch(() => {
+                document.getElementById('deposit-message').style.color = "#e53e3e";
+                document.getElementById('deposit-message').textContent = "Deposit failed. Try again.";
+            });
+        }
     </script>
 </body>
+</html>
 </html>
