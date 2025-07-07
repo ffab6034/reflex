@@ -46,7 +46,7 @@ async function setupGame() {
             startCountdown(startTime);
         }
         if (data.finished) {
-            document.getElementById('game-message').textContent = "Game Over!";
+            showResults(data.results);
         }
     });
 }
@@ -83,6 +83,25 @@ function startCountdown(startTime) {
             await gameRef.update({ finished: true });
         }
     }, 200);
+}
+
+function showResults(results) {
+    const msgDiv = document.getElementById('game-message');
+    if (!results) {
+        msgDiv.textContent = "Game Over!";
+        return;
+    }
+    let entries = Object.entries(results);
+    entries.sort((a, b) => a[1] - b[1]);
+    let winner = entries[0];
+    let myTime = results[userId];
+    let html = `<b>Game Over!</b><br>`;
+    html += `Winner: ${winner[0]}<br>Reaction Time: ${winner[1]} ms<br><br>`;
+    html += `All Players:<br>`;
+    entries.forEach(([uid, time]) => {
+        html += `${uid === userId ? "<b>You</b>" : uid}: ${time} ms<br>`;
+    });
+    msgDiv.innerHTML = html;
 }
 
 setupGame();
