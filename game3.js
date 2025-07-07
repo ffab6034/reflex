@@ -78,10 +78,78 @@ async function handleClick(i, targetIndex) {
     clicked = true;
     const clickTime = new Date();
     const reactionTime = clickTime - startTime;
-    document.getElementById('game-message').textContent = `Your reaction time: ${reactionTime} ms`;
-    await gameRef.set({
-        [`results.${userId}`]: reactionTime
-    }, { merge: true });
+    // Save reaction time if not already saved
+    const gameDoc = await gameRef.get();
+    const results = (gameDoc.exists && gameDoc.data().results) || {};
+    if (!results[userId]) {
+        await gameRef.set({
+            [`results.${userId}`]: reactionTime
+        }, { merge: true });
+    }
+    showResultsDialog();
+}
+
+function showResultsDialog() {
+    // Wait for all players or timeout, then fetch and show leaderboard
+    const dialog = document.createElement('div');
+    dialog.style.position = 'fixed';
+    dialog.style.top = '0';
+    dialog.style.left = '0';
+    dialog.style.width = '100vw';
+    dialog.style.height = '100vh';
+    dialog.style.background = 'rgba(0,0,0,0.4)';
+    dialog.style.display = 'flex';
+    dialog.style.alignItems = 'center';
+    dialog.style.justifyContent = 'center';
+    dialog.innerHTML = `<div style="background:#fff;padding:2em 1.5em;border-radius:16px;min-width:280px;text-align:center;">
+        <div id="leaderboard-content">Waiting for all players...</div>
+    </div>`;
+    document.body.appendChild(dialog);
+
+    // Poll for results until all players have tapped or game is finished
+    let interval = setInterval(async () => {
+        const roomSnap = await roomRef.get();
+        const players = (roomSnap.exists && roomSnap.data().players) || [];
+        const gameSnap = await gameRef.get();
+        const results = (gameSnap.exists && gameSnap.data().results) || {};
+        const finished = gameSnap.exists && gameSnap.data().finished;
+        const allTapped = players.every(uid => results[uid]);
+        if (allTapped || finished) {
+            clearInterval(interval);
+            // Fetch player names
+            let userIds = players;
+            if (userIds.length === 0) userIds = Object.keys(results);
+            db.collection('logins').where(firebase.firestore.FieldPath.documentId(), 'in', userIds.slice(0,10)).get()
+                .then(snapshot => {
+                    let nameMap = {};
+                    snapshot.forEach(doc => {
+                        nameMap[doc.id] = doc.data().name || doc.id;
+                    });
+                    let entries = Object.entries(results).filter(([uid]) => userIds.includes(uid));
+                    entries.sort((a, b) => a[1] - b[1]);
+                    let winner = entries[0];
+                    let html = `<b>Game Over!</b><br><br>`;
+                    html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
+                    html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
+                    entries.forEach(([uid, time], idx) => {
+                        html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${idx+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
+                    });
+                    html += `</table><br>`;
+                    html += `<button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
+                    document.getElementById('leaderboard-content').innerHTML = html;
+                    let timer = 5;
+                    const t = setInterval(() => {
+                        timer--;
+                        document.getElementById('back-timer').textContent = timer;
+                        if (timer <= 0) {
+                            clearInterval(t);
+                            window.location.href = "home.html";
+                        }
+                    }, 1000);
+                    document.getElementById('back-lobby-btn').onclick = () => window.location.href = "home.html";
+                });
+        }
+    }, 700);
 }
 
 function startCountdown(startTime) {
@@ -101,17 +169,37 @@ function showResults(results) {
         msgDiv.textContent = "Game Over!";
         return;
     }
-    let entries = Object.entries(results);
-    entries.sort((a, b) => a[1] - b[1]);
-    let winner = entries[0];
-    let myTime = results[userId];
-    let html = `<b>Game Over!</b><br>`;
-    html += `Winner: ${winner[0]}<br>Reaction Time: ${winner[1]} ms<br><br>`;
-    html += `All Players:<br>`;
-    entries.forEach(([uid, time]) => {
-        html += `${uid === userId ? "<b>You</b>" : uid}: ${time} ms<br>`;
-    });
-    msgDiv.innerHTML = html;
+    // Fetch player names from Firestore logins collection
+    const userIds = Object.keys(results);
+    db.collection('logins').where(firebase.firestore.FieldPath.documentId(), 'in', userIds.slice(0,10)).get()
+        .then(snapshot => {
+            let nameMap = {};
+            snapshot.forEach(doc => {
+                nameMap[doc.id] = doc.data().name || doc.id;
+            });
+            let entries = Object.entries(results);
+            entries.sort((a, b) => a[1] - b[1]);
+            let winner = entries[0];
+            let html = `<b>Game Over!</b><br><br>`;
+            html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
+            html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
+            entries.forEach(([uid, time], idx) => {
+                html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${idx+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
+            });
+            html += `</table><br>`;
+            html += `<button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
+            msgDiv.innerHTML = html;
+            let timer = 5;
+            const interval = setInterval(() => {
+                timer--;
+                document.getElementById('back-timer').textContent = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "home.html";
+                }
+            }, 1000);
+            document.getElementById('back-lobby-btn').onclick = () => window.location.href = "home.html";
+        });
 }
 
 setupGame();
