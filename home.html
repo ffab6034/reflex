@@ -7,25 +7,91 @@
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <div class="home-container">
-        <h1>Welcome to ReflexTap</h1>
-        <div class="tabs">
-            <div class="tab" onclick="location.href='lobby.html?gameType=tab'">
-                <span class="tab-icon">🎮</span>
-                <span class="tab-title">Tab to Earn</span>
-                <span class="tab-desc">Tap as fast as you can to earn points!</span>
+    <div class="home-container" id="main-content">
+        <div id="screen-home">
+            <h1>Welcome to ReflexTap</h1>
+            <div class="tabs">
+                <div class="tab" onclick="location.href='lobby.html?gameType=tab'">
+                    <span class="tab-icon">🎮</span>
+                    <span class="tab-title">Tab to Earn</span>
+                    <span class="tab-desc">Tap as fast as you can to earn points!</span>
+                </div>
+                <div class="tab" onclick="location.href='lobby.html?gameType=number'">
+                    <span class="tab-icon">🔢</span>
+                    <span class="tab-title">Number to Earn</span>
+                    <span class="tab-desc">Pick the right number to win rewards!</span>
+                </div>
+                <div class="tab" onclick="location.href='lobby.html?gameType=emoji'">
+                    <span class="tab-icon">😊</span>
+                    <span class="tab-title">Choose Emoji to Earn</span>
+                    <span class="tab-desc">Select the correct emoji and earn!</span>
+                </div>
             </div>
-            <div class="tab" onclick="location.href='lobby.html?gameType=number'">
-                <span class="tab-icon">🔢</span>
-                <span class="tab-title">Number to Earn</span>
-                <span class="tab-desc">Pick the right number to win rewards!</span>
+        </div>
+        <div id="screen-deposit" style="display:none;">
+            <h1>Deposit</h1>
+            <div style="margin-top:2rem;">
+                <p>Deposit functionality coming soon!</p>
             </div>
-            <div class="tab" onclick="location.href='lobby.html?gameType=emoji'">
-                <span class="tab-icon">😊</span>
-                <span class="tab-title">Choose Emoji to Earn</span>
-                <span class="tab-desc">Select the correct emoji and earn!</span>
+        </div>
+        <div id="screen-profile" style="display:none;">
+            <h1>Profile</h1>
+            <div style="margin-top:2rem;">
+                <p id="profile-info">Loading...</p>
             </div>
         </div>
     </div>
+    <div class="navbar">
+        <button class="navbar-btn active" id="nav-home" onclick="showScreen('home')">
+            <span class="icon">🏠</span>
+            Home
+        </button>
+        <button class="navbar-btn" id="nav-deposit" onclick="showScreen('deposit')">
+            <span class="icon">💰</span>
+            Deposit
+        </button>
+        <button class="navbar-btn" id="nav-profile" onclick="showScreen('profile')">
+            <span class="icon">👤</span>
+            Profile
+        </button>
+    </div>
+    <script>
+        function showScreen(screen) {
+            document.getElementById('screen-home').style.display = screen === 'home' ? '' : 'none';
+            document.getElementById('screen-deposit').style.display = screen === 'deposit' ? '' : 'none';
+            document.getElementById('screen-profile').style.display = screen === 'profile' ? '' : 'none';
+            document.getElementById('nav-home').classList.toggle('active', screen === 'home');
+            document.getElementById('nav-deposit').classList.toggle('active', screen === 'deposit');
+            document.getElementById('nav-profile').classList.toggle('active', screen === 'profile');
+            if (screen === 'profile') {
+                // Load profile info from localStorage or Firestore
+                const userId = localStorage.getItem('userId');
+                if (userId) {
+                    fetchProfile(userId);
+                } else {
+                    document.getElementById('profile-info').textContent = "Not logged in.";
+                }
+            }
+        }
+        function fetchProfile(userId) {
+            // Try to use Firestore if available
+            if (window.firebase && window.firebase.firestore) {
+                const db = firebase.firestore();
+                db.collection('logins').doc(userId).get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('profile-info').innerHTML =
+                            `<b>Name:</b> ${data.name || ''}<br><b>Phone:</b> ${data.phone || ''}`;
+                    } else {
+                        document.getElementById('profile-info').textContent = "Profile not found.";
+                    }
+                }).catch(() => {
+                    document.getElementById('profile-info').textContent = "Error loading profile.";
+                });
+            } else {
+                document.getElementById('profile-info').textContent = "Profile not available.";
+            }
+        }
+    </script>
 </body>
 </html>
