@@ -1,0 +1,83 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    background: #fff;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(76, 68, 182, 0.2);
+    max-width: 350px;
+    width: 100%;
+}
+
+.login-form h2 {
+    margin-bottom: 1.5rem;
+    color: #764ba2;
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 1.2rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #764ba2;
+    outline: none;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button[type="submit"]:hover {
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+}
+
+#message {
+    margin-top: 1rem;
+    text-align: center;
+    color: #e53e3e;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 500px) {
+    .login-container {
+        padding: 1.5rem 1rem;
+        max-width: 95vw;
+    }
+    .login-form h2 {
+        font-size: 1.5rem;
+    }
+}

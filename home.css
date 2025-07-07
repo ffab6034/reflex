@@ -1,0 +1,89 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-container {
+    background: #fff;
+    padding: 2.5rem 2rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(76, 68, 182, 0.18);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+}
+
+.home-container h1 {
+    color: #764ba2;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.tab {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 1.2rem 1rem;
+    box-shadow: 0 2px 12px rgba(76, 68, 182, 0.10);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.tab:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 6px 24px rgba(76, 68, 182, 0.18);
+}
+
+.tab-icon {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+}
+
+.tab-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    display: block;
+}
+
+.tab-desc {
+    font-size: 0.98rem;
+    color: #e0e0e0;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .home-container {
+        padding: 1.2rem 0.5rem;
+        max-width: 98vw;
+    }
+    .tabs {
+        gap: 0.7rem;
+    }
+    .tab {
+        padding: 0.8rem 0.5rem;
+        font-size: 0.98rem;
+    }
+    .tab-icon {
+        font-size: 1.5rem;
+    }
+    .home-container h1 {
+        font-size: 1.3rem;
+    }
+}
