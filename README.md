@@ -1,5 +1,5 @@
 git add .
-git commit -m "every scrren is working home deposit profile"
+git commit -m "updated v7"
 git push
 
 
