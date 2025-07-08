@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- Embedded CSS from game.css -->
+  <!-- Embedded CSS -->
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -61,15 +61,6 @@
       color: #fff;
     }
 
-    .grid-btn.target {
-      background: #667eea;
-      color: #fff;
-    }
-
-    .grid-btn.emoji {
-      font-size: 2rem;
-    }
-
     #game-message {
       font-size: 1.1rem;
       color: #764ba2;
@@ -88,7 +79,7 @@
         gap: 7px;
       }
 
-      .grid-btn, .grid-btn.emoji {
+      .grid-btn {
         width: 40px;
         height: 40px;
         font-size: 1.1rem;
@@ -103,7 +94,195 @@
     <div id="game-message"></div>
   </div>
 
-  <!-- Game logic -->
-  <script src="game1.js"></script>
+  <!-- Game Logic -->
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
+      authDomain: "reflex-tap-7815f.firebaseapp.com",
+      projectId: "reflex-tap-7815f",
+      storageBucket: "reflex-tap-7815f.appspot.com",
+      messagingSenderId: "833157218846",
+      appId: "1:833157218846:web:77bbf1c73b299004a1e40f",
+      measurementId: "G-ZDHDZJ7J0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('roomId');
+    const userId = localStorage.getItem('userId') || (() => {
+      window.location.href = 'index.html';
+    })();
+
+    const roomRef = db.collection('games').doc('tab').collection('rooms').doc(roomId);
+    const gameRef = roomRef.collection('game').doc('state');
+
+    let startTime = null;
+    let clicked = false;
+
+    async function setupGame() {
+      await db.runTransaction(async (transaction) => {
+        const gameDoc = await transaction.get(gameRef);
+        if (!gameDoc.exists) {
+          const redIndex = Math.floor(Math.random() * 16);
+          const now = firebase.firestore.Timestamp.now();
+          transaction.set(gameRef, {
+            redIndex,
+            startTime: now,
+            results: {},
+            finished: false
+          });
+        }
+      });
+
+      gameRef.onSnapshot(doc => {
+        const data = doc.data();
+        if (!data) return;
+        startTime = data.startTime.toDate();
+        renderGrid(data.redIndex);
+        if (!clicked) startCountdown(startTime);
+        if (data.finished) showResults(data.results);
+      });
+    }
+
+    function renderGrid(redIndex) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 16; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'grid-btn' + (i === redIndex ? ' red' : '');
+        btn.disabled = clicked;
+        btn.onclick = () => handleClick(i, redIndex);
+        grid.appendChild(btn);
+      }
+    }
+
+    async function handleClick(i, redIndex) {
+      if (clicked || i !== redIndex) return;
+      clicked = true;
+      const reactionTime = new Date() - startTime;
+
+      const gameDoc = await gameRef.get();
+      const results = (gameDoc.exists && gameDoc.data().results) || {};
+      if (!results[userId]) {
+        await gameRef.set({ [`results.${userId}`]: reactionTime }, { merge: true });
+      }
+
+      showResultsDialog();
+    }
+
+    function startCountdown(startTime) {
+      const interval = setInterval(async () => {
+        const now = new Date();
+        const elapsed = (now - startTime) / 1000;
+        if (elapsed >= 8) {
+          clearInterval(interval);
+          const gameSnap = await gameRef.get();
+          const results = (gameSnap.exists && gameSnap.data().results) || {};
+          const roomSnap = await roomRef.get();
+          const players = (roomSnap.exists && roomSnap.data().players) || [];
+          const allTapped = players.every(uid => results[uid]);
+          if (!gameSnap.data().finished && !allTapped) {
+            await gameRef.update({ finished: true });
+          }
+        }
+      }, 200);
+    }
+
+    function showResultsDialog() {
+      const dialog = document.createElement('div');
+      dialog.style = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+      `;
+      dialog.innerHTML = `<div style="background:#fff;padding:2em 1.5em;border-radius:16px;min-width:280px;text-align:center;">
+        <div id="leaderboard-content">Waiting for all players...</div>
+      </div>`;
+      document.body.appendChild(dialog);
+
+      const interval = setInterval(async () => {
+        const roomSnap = await roomRef.get();
+        const players = (roomSnap.exists && roomSnap.data().players) || [];
+        const gameSnap = await gameRef.get();
+        const results = (gameSnap.exists && gameSnap.data().results) || {};
+        const finished = gameSnap.exists && gameSnap.data().finished;
+        const allTapped = players.every(uid => results[uid]);
+
+        if (allTapped || finished) {
+          clearInterval(interval);
+          const userIds = players.length ? players : Object.keys(results);
+          const snapshot = await db.collection('logins')
+            .where(firebase.firestore.FieldPath.documentId(), 'in', userIds.slice(0, 10)).get();
+          const nameMap = {};
+          snapshot.forEach(doc => nameMap[doc.id] = doc.data().name || doc.id);
+
+          const entries = Object.entries(results).filter(([uid]) => userIds.includes(uid));
+          entries.sort((a, b) => a[1] - b[1]);
+          const winner = entries[0];
+          let html = `<b>Game Over!</b><br><br>`;
+          html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
+          html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
+          entries.forEach(([uid, time], idx) => {
+            html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${idx+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
+          });
+          html += `</table><br>`;
+          html += `<button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
+          document.getElementById('leaderboard-content').innerHTML = html;
+
+          let timer = 5;
+          const t = setInterval(() => {
+            timer--;
+            document.getElementById('back-timer').textContent = timer;
+            if (timer <= 0) {
+              clearInterval(t);
+              window.location.href = "home.html";
+            }
+          }, 1000);
+          document.getElementById('back-lobby-btn').onclick = () => window.location.href = "home.html";
+        }
+      }, 700);
+    }
+
+    function showResults(results) {
+      const msgDiv = document.getElementById('game-message');
+      if (!results) {
+        msgDiv.textContent = "Game Over!";
+        return;
+      }
+
+      const userIds = Object.keys(results);
+      db.collection('logins').where(firebase.firestore.FieldPath.documentId(), 'in', userIds.slice(0,10)).get()
+        .then(snapshot => {
+          let nameMap = {};
+          snapshot.forEach(doc => nameMap[doc.id] = doc.data().name || doc.id);
+          const entries = Object.entries(results).sort((a, b) => a[1] - b[1]);
+          const winner = entries[0];
+
+          let html = `<b>Game Over!</b><br><br>`;
+          html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
+          html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
+          entries.forEach(([uid, time], idx) => {
+            html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${idx+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
+          });
+          html += `</table><br>`;
+          html += `<button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
+          msgDiv.innerHTML = html;
+
+          let timer = 5;
+          const interval = setInterval(() => {
+            timer--;
+            document.getElementById('back-timer').textContent = timer;
+            if (timer <= 0) {
+              clearInterval(interval);
+              window.location.href = "home.html";
+            }
+          }, 1000);
+          document.getElementById('back-lobby-btn').onclick = () => window.location.href = "home.html";
+        });
+    }
+
+    setupGame();
+  </script>
 </body>
 </html>

@@ -3,10 +3,10 @@ git commit -m "every scrren is working home deposit profile"
 git push
 
 
-git checkout -b reflex_v5
+git checkout -b reflex_v6
 git add .
-git commit -m "reflex_v  updating balance works but navigator error i cang to to lobby" 
-git push origin reflex_v5
+git commit -m "reflex_v6 html css combined" 
+git push origin reflex_v6
 
 
 
