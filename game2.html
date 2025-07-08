@@ -11,92 +11,123 @@
 
   <!-- Embedded Styles -->
   <style>
+    :root {
+      --primary: #764ba2;
+      --secondary: #667eea;
+      --white: #ffffff;
+      --gray: #e2e8f0;
+    }
+
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .game-container {
-      background: #fff;
-      padding: 2rem 1.5rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(76, 68, 182, 0.18);
-      max-width: 420px;
+      background: var(--white);
       width: 100%;
+      max-width: 440px;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
-    h2 {
-      color: #764ba2;
-      margin-bottom: 1.2rem;
+    .app-bar {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: var(--white);
+      font-size: 1.4rem;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .game-container h2 {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      color: var(--primary);
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 60px);
       grid-template-rows: repeat(4, 60px);
-      gap: 12px;
+      gap: 14px;
       justify-content: center;
-      margin-bottom: 1.2rem;
+      margin-top: 1.2rem;
     }
 
     .grid-btn {
       width: 60px;
       height: 60px;
-      border-radius: 12px;
+      font-size: 1.4rem;
       border: none;
-      font-size: 1.5rem;
-      background: #e2e8f0;
+      border-radius: 14px;
+      background-color: var(--gray);
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .grid-btn.target {
-      background: #667eea;
-      color: #fff;
+      background: var(--secondary);
+      color: var(--white);
+      font-weight: bold;
+    }
+
+    .grid-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     #game-message {
-      font-size: 1.1rem;
-      color: #764ba2;
-      margin-top: 0.5rem;
+      font-size: 1rem;
+      margin-top: 1.2rem;
+      color: var(--primary);
     }
 
     @media (max-width: 600px) {
       .game-container {
-        padding: 1rem 0.3rem;
-        max-width: 98vw;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+
+      .app-bar {
+        font-size: 1.1rem;
+        padding: 0.8rem;
       }
 
       .grid {
         grid-template-columns: repeat(4, 40px);
         grid-template-rows: repeat(4, 40px);
-        gap: 7px;
+        gap: 8px;
       }
 
       .grid-btn {
         width: 40px;
         height: 40px;
         font-size: 1.1rem;
+        border-radius: 10px;
       }
     }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <h2>Tap the Number: <span id="target-number"></span></h2>
+    <div class="app-bar">Number Game</div>
+    <h2>Tap the Number: <span id="target-number">--</span></h2>
     <div id="grid" class="grid"></div>
     <div id="game-message"></div>
   </div>
 
-  <!-- Embedded Game Script -->
+  <!-- Embedded Script -->
   <script>
-    // --- Firebase Config ---
     const firebaseConfig = {
       apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
       authDomain: "reflex-tap-7815f.firebaseapp.com",
@@ -111,7 +142,7 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get('roomId');
-    const userId = 'user_' + Math.random().toString(36).substr(2, 9); // Replace with actual ID in production
+    const userId = localStorage.getItem("userId") || 'user_' + Math.random().toString(36).substr(2, 9);
 
     const roomRef = db.collection('games').doc('number').collection('rooms').doc(roomId);
     const gameRef = roomRef.collection('game').doc('state');
@@ -187,7 +218,7 @@
 
     function showResultsDialog() {
       const dialog = document.createElement('div');
-      dialog.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;`;
+      dialog.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;`;
       dialog.innerHTML = `<div style="background:#fff;padding:2em 1.5em;border-radius:16px;min-width:280px;text-align:center;">
           <div id="leaderboard-content">Waiting for all players...</div>
       </div>`;

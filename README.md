@@ -3,10 +3,10 @@ git commit -m "every scrren is working home deposit profile"
 git push
 
 
-git checkout -b reflex_v6
+git checkout -b reflex_v7
 git add .
-git commit -m "reflex_v6 html css combined" 
-git push origin reflex_v6
+git commit -m "reflex_v7 only html left" 
+git push origin reflex_v7
 
 
 
