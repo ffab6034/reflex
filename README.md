@@ -1,5 +1,5 @@
 git add .
-git commit -m "updated v7"
+git commit -m "updated home"
 git push
 
 

@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Lobby</title>
+  <title>ReflexTap - Lobby</title>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
-
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f8;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -25,139 +28,163 @@
 
     .appbar {
       height: 64px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: linear-gradient(90deg, #8e2de2, #4a00e0);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 1.4rem;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
       position: fixed;
       top: 0;
       width: 100%;
-      z-index: 100;
     }
 
     .lobby-container {
-      margin-top: 64px;
-      padding: 1.5rem 1rem 2rem;
-      max-width: 480px;
-      width: 100%;
-      margin-left: auto;
-      margin-right: auto;
-      overflow-y: auto;
+      padding: 1.5rem 1rem;
+      padding-top: 80px;
       flex: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
     }
 
     #lobby-title {
-      color: #333;
       text-align: center;
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: 1.7rem;
+      font-weight: 700;
       margin-bottom: 1.5rem;
+      color: #ffde59;
+      text-shadow: 0 0 10px rgba(255, 222, 89, 0.6);
     }
 
     #rooms-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
     }
 
     .room-card {
-      background: white;
-      border-radius: 14px;
-      padding: 1.2rem;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease;
+      animation: fadeInUp 0.4s ease;
       display: flex;
       flex-direction: column;
-      gap: 0.7rem;
+      justify-content: space-between;
+      min-height: 140px;
+    }
+
+    .room-card:hover {
+      transform: scale(1.03);
     }
 
     .room-info {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
     .room-id {
+      font-size: 1rem;
       font-weight: bold;
-      font-size: 1.05rem;
-      color: #4a4a4a;
+      color: #ffffff;
+      word-break: break-all;
     }
 
     .room-status {
-      font-size: 0.9rem;
-      padding: 0.3rem 0.75rem;
-      border-radius: 8px;
-      background: #e0d6fb;
-      color: #5e35b1;
+      font-size: 0.8rem;
+      background: #ff6b81;
+      padding: 0.25rem 0.6rem;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 0.2rem;
+      width: fit-content;
     }
 
     .room-players {
-      font-size: 0.95rem;
-      color: #666;
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      color: #ccc;
     }
 
     .join-btn {
-      padding: 0.6rem 1.2rem;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      color: white;
+      margin-top: auto;
+      padding: 0.55rem 1rem;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      color: white;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
-      align-self: flex-end;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 0 10px rgba(255, 75, 43, 0.6);
+      width: 100%;
     }
 
     .join-btn:hover {
-      background: linear-gradient(90deg, #5a67d8, #6b46c1);
+      background: linear-gradient(90deg, #ff4b2b, #ff416c);
       transform: scale(1.03);
     }
 
     #lobby-message {
       margin-top: 1rem;
       text-align: center;
-      color: #e53e3e;
-      font-size: 0.98rem;
+      color: #ffc107;
+      font-size: 1rem;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
     }
 
     @media (max-width: 600px) {
-      .lobby-container {
-        padding: 1rem 0.8rem;
-      }
-
-      .room-id {
-        font-size: 1rem;
-      }
-
-      .join-btn {
-        font-size: 0.95rem;
-        padding: 0.5rem 1rem;
+      #rooms-list {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="appbar">Game Lobby</div>
+  <div class="appbar">ReflexTap Lobby</div>
 
   <div class="lobby-container">
-    <h2 id="lobby-title">Available Rooms</h2>
+    <h2 id="lobby-title">Loading Rooms...</h2>
     <div id="rooms-list"></div>
     <div id="lobby-message"></div>
   </div>
 
   <script>
-    // --- Firebase Configuration ---
     const firebaseConfig = {
       apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
       authDomain: "reflex-tap-7815f.firebaseapp.com",
       projectId: "reflex-tap-7815f",
-      storageBucket: "reflex-tap-7815f.firebasestorage.app",
+      storageBucket: "reflex-tap-7815f.appspot.com",
       messagingSenderId: "833157218846",
       appId: "1:833157218846:web:77bbf1c73b299004a1e40f",
       measurementId: "G-ZDHDZJ7J0B"
@@ -166,21 +193,16 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- Extract game type and user ID ---
     const urlParams = new URLSearchParams(window.location.search);
     const gameType = urlParams.get('gameType') || 'tab';
-    const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
+    const userId = localStorage.getItem('userId') || 'guest_' + Math.random().toString(36).slice(2, 8);
 
-    document.getElementById('lobby-title').textContent =
-      `Lobby - ${gameType.charAt(0).toUpperCase() + gameType.slice(1)} Game`;
+    document.getElementById('lobby-title').textContent = `${gameType.charAt(0).toUpperCase() + gameType.slice(1)} Game Lobby`;
 
-    // --- Create empty rooms if needed ---
     async function createRoomsIfNeeded() {
       const roomsRef = db.collection('games').doc(gameType).collection('rooms');
       const snap = await roomsRef.where('status', '==', 'waiting').get();
-      const waitingRooms = snap.docs;
-
-      for (let i = waitingRooms.length; i < 10; i++) {
+      for (let i = snap.size; i < 10; i++) {
         await roomsRef.add({
           players: [],
           status: 'waiting',
@@ -190,19 +212,12 @@
       }
     }
 
-    // --- Fetch and Display Rooms ---
     async function fetchRooms() {
       const roomsRef = db.collection('games').doc(gameType).collection('rooms');
-      const snap = await roomsRef.orderBy('createdAt', 'desc').limit(10).get();
-      let rooms = [];
-
-      snap.forEach(doc => {
-        const data = doc.data();
-        if (data.status === 'waiting') {
-          rooms.push({ id: doc.id, ...data });
-        }
-      });
-
+const snap = await roomsRef.orderBy('createdAt', 'desc').get();
+      const rooms = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(room => room.status === 'waiting');
       renderRooms(rooms);
     }
 
@@ -212,18 +227,16 @@
 
       rooms.forEach(room => {
         const players = room.players || [];
-        const status = room.status || 'waiting';
-        const maxPlayers = room.maxPlayers || 10;
-        const canJoin = status === 'waiting' && players.length < maxPlayers && !players.includes(userId);
+        const canJoin = players.length < room.maxPlayers && !players.includes(userId);
 
         const card = document.createElement('div');
         card.className = 'room-card';
         card.innerHTML = `
           <div class="room-info">
             <span class="room-id">Room ID: ${room.id}</span>
-            <span class="room-status">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+            <span class="room-status">${room.status}</span>
           </div>
-          <div class="room-players">Players: ${players.length}/${maxPlayers}</div>
+          <div class="room-players">Players: ${players.length}/${room.maxPlayers}</div>
           ${canJoin ? `<button class="join-btn" data-room="${room.id}">Join Room</button>` : ''}
         `;
         roomsList.appendChild(card);
@@ -231,75 +244,57 @@
 
       document.querySelectorAll('.join-btn').forEach(btn => {
         btn.onclick = async () => {
-          const roomId = btn.getAttribute('data-room');
+          const roomId = btn.dataset.room;
           await joinRoom(roomId);
         };
       });
     }
 
-    // --- Join Room ---
     async function joinRoom(roomId) {
       const roomRef = db.collection('games').doc(gameType).collection('rooms').doc(roomId);
-      const roomSnap = await roomRef.get();
-      if (!roomSnap.exists) return;
+      const snap = await roomRef.get();
+      const room = snap.data();
+      if (!room || room.players.includes(userId) || room.players.length >= room.maxPlayers) return;
 
-      const room = roomSnap.data();
-      let players = room.players || [];
-      let maxPlayers = room.maxPlayers || 10;
-
-      if (players.length >= maxPlayers || players.includes(userId)) return;
-
-      if (players.length === 0) {
-        let chosen = prompt("How many players for this room? (2–10)", "10");
-        let chosenNum = parseInt(chosen, 10);
-        if (isNaN(chosenNum) || chosenNum < 2 || chosenNum > 10) chosenNum = 10;
-        maxPlayers = chosenNum;
+      if (room.players.length === 0) {
+        const input = prompt("How many players for this room? (2–10)", "10");
+        const maxPlayers = Math.min(Math.max(parseInt(input), 2), 10);
         await roomRef.update({ maxPlayers });
       }
 
-      players.push(userId);
-      await roomRef.update({ players });
-
-      if (!room.timerStarted) {
-        await roomRef.update({
-          timerStarted: true,
-          timerStartAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
+      await roomRef.update({
+        players: firebase.firestore.FieldValue.arrayUnion(userId),
+        timerStarted: true,
+        timerStartAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
       listenRoom(roomId);
     }
 
-    // --- Room Listener ---
     function listenRoom(roomId) {
-      const roomRef = db.collection('games').doc(gameType).collection('rooms').doc(roomId);
-      const unsub = roomRef.onSnapshot(async doc => {
-        const data = doc.data();
-        if (!data) return;
+      const ref = db.collection('games').doc(gameType).collection('rooms').doc(roomId);
+      const unsub = ref.onSnapshot(async doc => {
+        const room = doc.data();
+        if (!room) return;
 
-        const maxPlayers = data.maxPlayers || 10;
-
-        if (data.players && data.players.length >= maxPlayers && data.status !== 'started') {
-          await roomRef.update({ status: 'started' });
+        if (room.players.length >= room.maxPlayers && room.status !== 'started') {
+          await ref.update({ status: 'started' });
         }
 
-        if (data.status === 'started') {
-          await roomRef.delete();
+        if (room.status === 'started') {
+          await ref.delete();
           await createRoomsIfNeeded();
 
-          let gamePage = 'game1.html';
-          if (gameType === 'number') gamePage = 'game2.html';
-          if (gameType === 'emoji') gamePage = 'game3.html';
-
-          window.location.href = `${gamePage}?roomId=${doc.id}`;
+          const gameMap = { tab: 'game1.html', number: 'game2.html', emoji: 'game3.html' };
+          const gameUrl = gameMap[gameType] || 'game1.html';
+          window.location.href = `${gameUrl}?roomId=${doc.id}`;
           unsub();
-        } else if (data.timerStarted && data.status !== 'started') {
-          const startAt = data.timerStartAt ? data.timerStartAt.toDate() : null;
-          if (startAt) {
-            const now = new Date();
-            const elapsed = (now - startAt) / 1000;
+        } else if (room.timerStarted) {
+          const startedAt = room.timerStartAt?.toDate();
+          if (startedAt) {
+            const elapsed = (Date.now() - startedAt.getTime()) / 1000;
             if (elapsed >= 10) {
-              await roomRef.update({ status: 'started' });
+              await ref.update({ status: 'started' });
             } else {
               document.getElementById('lobby-message').textContent =
                 `Game starts in ${Math.ceil(10 - elapsed)}s or when room is full.`;
@@ -309,18 +304,13 @@
       });
     }
 
-    // --- Start Lobby ---
-    async function initLobby() {
+    async function startLobby() {
       await createRoomsIfNeeded();
       await fetchRooms();
-
-      setInterval(async () => {
-        await createRoomsIfNeeded();
-        await fetchRooms();
-      }, 2000);
+      setInterval(fetchRooms, 2000);
     }
 
-    initLobby();
+    startLobby();
   </script>
 </body>
 </html>
