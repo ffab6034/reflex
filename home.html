@@ -119,10 +119,14 @@
             const userRef = db.collection('logins').doc(userId);
             userRef.get().then(doc => {
                 let balance = 0;
-                if (doc.exists && doc.data().balance) {
-                    balance = doc.data().balance;
+                if (doc.exists) {
+                    // If balance field does not exist, initialize it to 0
+                    balance = typeof doc.data().balance === "number" ? doc.data().balance : 0;
+                    return userRef.update({ balance: balance + amount });
+                } else {
+                    // If user doc does not exist, create it with balance
+                    return userRef.set({ balance: amount }, { merge: true });
                 }
-                return userRef.update({ balance: balance + amount });
             }).then(() => {
                 document.getElementById('deposit-message').style.color = "#38a169";
                 document.getElementById('deposit-message').textContent = `₹${amount} added to your balance!`;
@@ -133,5 +137,4 @@
         }
     </script>
 </body>
-</html>
 </html>
