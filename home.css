@@ -193,3 +193,26 @@ body {
         min-width: 70px;
     }
 }
+
+/* 
+.deposit-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+}
+.deposit-plan {
+  margin: 0;
+  font-weight: 500;
+  color: #333;
+}
+.deposit-date {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #777;
+}
+.deposit-amount {
+  margin: 0;
+  color: #4CAF50;
+  font-weight: 600;
+} */

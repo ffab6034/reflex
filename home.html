@@ -1,119 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReflexTap - Home</title>
-    <link rel="stylesheet" href="home.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="home.js" defer></script>
-</head>
-<body>
-    <div class="home-container" id="main-content">
-        <div id="screen-home">
-            <h1>Welcome to ReflexTap</h1>
-            <div class="tabs">
-                <div class="tab" data-game="tab">
-                    <span class="tab-icon">🎮</span>
-                    <span class="tab-title">Tab to Earn</span>
-                    <span class="tab-desc">Tap as fast as you can to earn points!</span>
-                </div>
-                <div class="tab" data-game="number">
-                    <span class="tab-icon">🔢</span>
-                    <span class="tab-title">Number to Earn</span>
-                    <span class="tab-desc">Pick the right number to win rewards!</span>
-                </div>
-                <div class="tab" data-game="emoji">
-                    <span class="tab-icon">😊</span>
-                    <span class="tab-title">Choose Emoji to Earn</span>
-                    <span class="tab-desc">Select the correct emoji and earn!</span>
-                </div>
-            </div>
-        </div>
-        <div id="screen-deposit" style="display:none;">
-            <h1>Deposit</h1>
-            <div class="plans">
-                <div class="plan-card" data-amount="49" data-plan="Starter">
-                    <div class="plan-amount">₹49</div>
-                    <div class="plan-desc">Starter Plan</div>
-                </div>
-                <div class="plan-card" data-amount="99" data-plan="Pro">
-                    <div class="plan-amount">₹99</div>
-                    <div class="plan-desc">Pro Plan</div>
-                </div>
-                <div class="plan-card" data-amount="149" data-plan="Elite">
-                    <div class="plan-amount">₹149</div>
-                    <div class="plan-desc">Elite Plan</div>
-                </div>
-            </div>
-            <div id="profile-section" style="margin-top:1.2rem;"></div>
-        </div>
-        <div id="screen-profile" style="display:none;">
-            <h1>Profile</h1>
-            <div style="margin-top:2rem;">
-                <p id="profile-info">Loading...</p>
-            </div>
-        </div>
-    </div>
-    <div class="navbar">
-        <button class="navbar-btn active" id="nav-home" onclick="showScreen('home')">
-            <span class="icon">🏠</span>
-            Home
-        </button>
-        <button class="navbar-btn" id="nav-deposit" onclick="showScreen('deposit')">
-            <span class="icon">💰</span>
-            Deposit
-        </button>
-        <button class="navbar-btn" id="nav-profile" onclick="showScreen('profile')">
-            <span class="icon">👤</span>
-            Profile
-        </button>
-    </div>
-    <script>
-        function showScreen(screen) {
-            document.getElementById('screen-home').style.display = screen === 'home' ? '' : 'none';
-            document.getElementById('screen-deposit').style.display = screen === 'deposit' ? '' : 'none';
-            document.getElementById('screen-profile').style.display = screen === 'profile' ? '' : 'none';
-            document.getElementById('nav-home').classList.toggle('active', screen === 'home');
-            document.getElementById('nav-deposit').classList.toggle('active', screen === 'deposit');
-            document.getElementById('nav-profile').classList.toggle('active', screen === 'profile');
-            
-            if (screen === 'profile') {
-                // Load profile info from localStorage or Firestore
-                const userId = localStorage.getItem('userId');
-                if (userId) {
-                    fetchProfile(userId);
-                } else {
-                    document.getElementById('profile-info').textContent = "Not logged in.";
-                }
-            }
-        }
-
-        function fetchProfile(userId) {
-            // Try to use Firestore if available
-            if (window.firebase && window.firebase.firestore) {
-                const db = firebase.firestore();
-                db.collection('logins').doc(userId).get().then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        document.getElementById('profile-info').innerHTML =
-                            `<b>Name:</b> ${data.name || ''}<br><b>Phone:</b> ${data.phone || ''}`;
-                    } else {
-                        document.getElementById('profile-info').textContent = "Profile not found.";
-                    }
-                }).catch(() => {
-                    document.getElementById('profile-info').textContent = "Error loading profile.";
-                });
-            } else {
-                document.getElementById('profile-info').textContent = "Profile not available.";
-            }
-        }
-    </script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,12 +51,86 @@
             </div>
             <div id="profile-section" style="margin-top:1.2rem;"></div>
         </div>
-        <div id="screen-profile" style="display:none;">
-            <h1>Profile</h1>
-            <div style="margin-top:2rem;">
-                <p id="profile-info">Loading...</p>
+      <div id="screen-profile" style="display:none;">
+    <h1>Your Profile</h1>
+    
+    <!-- User Card (Top Section) -->
+    <div class="profile-card" style="
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    ">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="
+                background: rgba(255,255,255,0.2);
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            ">
+                👤
+            </div>
+            <div>
+                <h2 style="margin: 0; font-weight: 600;" id="profile-name">Loading...</h2>
+                <p style="margin: 5px 0 0; opacity: 0.9;" id="profile-phone"></p>
             </div>
         </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div style="margin: 25px 0;">
+        <h3 style="margin-bottom: 15px; color: #555;">Your Stats</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- Balance Card -->
+            <div class="stat-card" style="
+                background: white;
+                border-radius: 10px;
+                padding: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                border: 1px solid #eee;
+            ">
+                <p style="margin: 0 0 8px; font-size: 0.9rem; color: #777;">Balance</p>
+                <p style="margin: 0; font-size: 1.4rem; font-weight: 700; color: #4CAF50;" id="profile-balance">₹0</p>
+            </div>
+            
+            <!-- Total Deposits Card -->
+            <div class="stat-card" style="
+                background: white;
+                border-radius: 10px;
+                padding: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                border: 1px solid #eee;
+            ">
+                <p style="margin: 0 0 8px; font-size: 0.9rem; color: #777;">Total Deposits</p>
+                <p style="margin: 0; font-size: 1.4rem; font-weight: 700; color: #2196F3;" id="total-deposits">₹0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div style="margin: 30px 0;">
+        <h3 style="margin-bottom: 15px; color: #555;">Recent Deposits</h3>
+        <div id="deposit-history" style="
+            background: white;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            max-height: 300px;
+            overflow-y: auto;
+        ">
+            <p style="padding: 20px; text-align: center; color: #999;" id="no-deposits">No deposits yet.</p>
+            <!-- Deposits will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
     </div>
     <div class="navbar">
         <button class="navbar-btn active" id="nav-home" onclick="showScreen('home')">
