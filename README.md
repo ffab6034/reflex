@@ -1,12 +1,12 @@
 git add .
-git commit -m "firebase, add money, works"
+git commit -m "every scrren is working home deposit profile"
 git push
 
 
-git checkout -b reflex_v3 
+git checkout -b reflex_v4
 git add .
-git commit -m "reflex_v3  updating balance works but navigator error i cang to to lobby" 
-git push origin reflex_v3 
+git commit -m "reflex_v4  updating balance works but navigator error i cang to to lobby" 
+git push origin reflex_v4
 
 
 
