@@ -34,9 +34,8 @@
       padding: 2.5rem 2rem;
       border-radius: 24px;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-      text-align: center;
       animation: fadeInUp 0.8s ease-out;
     }
 
@@ -47,9 +46,37 @@
 
     h2 {
       color: #2b1055;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       font-size: 1.8rem;
-      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      border: 2px solid #e2e2e2;
+      border-radius: 12px;
+      background-color: #fafafa;
+      transition: 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #667eea;
+      background-color: #fff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
     }
 
     #google-login {
@@ -79,9 +106,14 @@
     }
 
     #message {
-      margin-top: 1.2rem;
+      text-align: center;
+      margin-top: 1rem;
       font-size: 0.95rem;
-      color: #444;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     @media (max-width: 500px) {
@@ -93,15 +125,26 @@
 <body>
   <div class="login-container">
     <h2>Reflex-Tap</h2>
+
+    <div class="input-group">
+      <label for="name">Your Name</label>
+      <input type="text" id="name" placeholder="Enter your name" required />
+    </div>
+
+    <div class="input-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="10-digit phone number" pattern="[0-9]{10}" required />
+    </div>
+
     <button id="google-login">
       <img src="https://developers.google.com/identity/images/g-logo.png" alt="G" />
       Sign in with Google
     </button>
+
     <div id="message"></div>
   </div>
 
   <script>
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
       authDomain: "reflex-tap-7815f.firebaseapp.com",
@@ -112,7 +155,6 @@
       measurementId: "G-ZDHDZJ7J0B"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -120,9 +162,18 @@
     const messageDiv = document.getElementById('message');
     const googleBtn = document.getElementById('google-login');
 
-    // Sign in with Google
     googleBtn.addEventListener('click', async () => {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      if (!name || !/^\d{10}$/.test(phone)) {
+        messageDiv.style.color = "#e53e3e";
+        messageDiv.textContent = "Please enter a valid name and 10-digit phone.";
+        return;
+      }
+
       const provider = new firebase.auth.GoogleAuthProvider();
+
       try {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
@@ -133,27 +184,29 @@
 
         if (!snapshot.exists) {
           await userRef.set({
-            name: displayName,
+            name,
+            phone,
             email,
             photoURL,
             balance: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+        } else {
+          await userRef.update({ name, phone }); // Optional update
         }
 
         localStorage.setItem("userId", uid);
         messageDiv.style.color = "#38a169";
         messageDiv.textContent = "Login successful! Redirecting...";
-
         setTimeout(() => window.location.href = "home.html", 1000);
       } catch (err) {
-        console.error("Sign-in Error:", err.message);
+        console.error("Login error:", err.message);
         messageDiv.style.color = "#e53e3e";
         messageDiv.textContent = "Login failed: " + err.message;
       }
     });
 
-    // Auto-login if already signed in
+    // Auto-login redirect
     auth.onAuthStateChanged(user => {
       if (user) {
         localStorage.setItem("userId", user.uid);
@@ -161,11 +214,10 @@
       }
     });
 
-    // Register service worker
+    // PWA service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(console.error);
     }
   </script>
 </body>
 </html>
-    
