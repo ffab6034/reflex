@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,23 +7,24 @@
     <link rel="stylesheet" href="home.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="home.js" defer></script>
 </head>
 <body>
     <div class="home-container" id="main-content">
         <div id="screen-home">
             <h1>Welcome to ReflexTap</h1>
             <div class="tabs">
-                <div class="tab" onclick="location.href='lobby.html?gameType=tab'">
+                <div class="tab" data-game="tab">
                     <span class="tab-icon">🎮</span>
                     <span class="tab-title">Tab to Earn</span>
                     <span class="tab-desc">Tap as fast as you can to earn points!</span>
                 </div>
-                <div class="tab" onclick="location.href='lobby.html?gameType=number'">
+                <div class="tab" data-game="number">
                     <span class="tab-icon">🔢</span>
                     <span class="tab-title">Number to Earn</span>
                     <span class="tab-desc">Pick the right number to win rewards!</span>
                 </div>
-                <div class="tab" onclick="location.href='lobby.html?gameType=emoji'">
+                <div class="tab" data-game="emoji">
                     <span class="tab-icon">😊</span>
                     <span class="tab-title">Choose Emoji to Earn</span>
                     <span class="tab-desc">Select the correct emoji and earn!</span>
@@ -33,20 +34,20 @@
         <div id="screen-deposit" style="display:none;">
             <h1>Deposit</h1>
             <div class="plans">
-                <div class="plan-card" onclick="depositAmount(49)">
+                <div class="plan-card" data-amount="49" data-plan="Starter">
                     <div class="plan-amount">₹49</div>
                     <div class="plan-desc">Starter Plan</div>
                 </div>
-                <div class="plan-card" onclick="depositAmount(99)">
+                <div class="plan-card" data-amount="99" data-plan="Pro">
                     <div class="plan-amount">₹99</div>
                     <div class="plan-desc">Pro Plan</div>
                 </div>
-                <div class="plan-card" onclick="depositAmount(149)">
+                <div class="plan-card" data-amount="149" data-plan="Elite">
                     <div class="plan-amount">₹149</div>
                     <div class="plan-desc">Elite Plan</div>
                 </div>
             </div>
-            <div id="deposit-message" style="margin-top:1.2rem;text-align:center;color:#38a169;"></div>
+            <div id="profile-section" style="margin-top:1.2rem;"></div>
         </div>
         <div id="screen-profile" style="display:none;">
             <h1>Profile</h1>
@@ -77,6 +78,7 @@
             document.getElementById('nav-home').classList.toggle('active', screen === 'home');
             document.getElementById('nav-deposit').classList.toggle('active', screen === 'deposit');
             document.getElementById('nav-profile').classList.toggle('active', screen === 'profile');
+            
             if (screen === 'profile') {
                 // Load profile info from localStorage or Firestore
                 const userId = localStorage.getItem('userId');
@@ -87,6 +89,7 @@
                 }
             }
         }
+
         function fetchProfile(userId) {
             // Try to use Firestore if available
             if (window.firebase && window.firebase.firestore) {
@@ -106,35 +109,85 @@
                 document.getElementById('profile-info').textContent = "Profile not available.";
             }
         }
-        function depositAmount(amount) {
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                document.getElementById('deposit-message').style.color = "#e53e3e";
-                document.getElementById('deposit-message').textContent = "Please login first.";
-                return;
-            }
-            document.getElementById('deposit-message').style.color = "#764ba2";
-            document.getElementById('deposit-message').textContent = "Processing...";
-            const db = firebase.firestore();
-            const userRef = db.collection('logins').doc(userId);
-            userRef.get().then(doc => {
-                let balance = 0;
-                if (doc.exists) {
-                    // If balance field does not exist, initialize it to 0
-                    balance = typeof doc.data().balance === "number" ? doc.data().balance : 0;
-                    return userRef.update({ balance: balance + amount });
-                } else {
-                    // If user doc does not exist, create it with balance
-                    return userRef.set({ balance: amount }, { merge: true });
-                }
-            }).then(() => {
-                document.getElementById('deposit-message').style.color = "#38a169";
-                document.getElementById('deposit-message').textContent = `₹${amount} added to your balance!`;
-            }).catch(() => {
-                document.getElementById('deposit-message').style.color = "#e53e3e";
-                document.getElementById('deposit-message').textContent = "Deposit failed. Try again.";
-            });
-        }
     </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReflexTap - Home</title>
+    <link rel="stylesheet" href="home.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="home-container" id="main-content">
+        <div id="screen-home">
+            <h1>Welcome to ReflexTap</h1>
+            <div class="tabs">
+                <div class="tab" data-game="tab">
+                    <span class="tab-icon">🎮</span>
+                    <span class="tab-title">Tab to Earn</span>
+                    <span class="tab-desc">Tap as fast as you can to earn points!</span>
+                </div>
+                <div class="tab" data-game="number">
+                    <span class="tab-icon">🔢</span>
+                    <span class="tab-title">Number to Earn</span>
+                    <span class="tab-desc">Pick the right number to win rewards!</span>
+                </div>
+                <div class="tab" data-game="emoji">
+                    <span class="tab-icon">😊</span>
+                    <span class="tab-title">Choose Emoji to Earn</span>
+                    <span class="tab-desc">Select the correct emoji and earn!</span>
+                </div>
+            </div>
+        </div>
+        <div id="screen-deposit" style="display:none;">
+            <h1>Deposit</h1>
+            <div id="current-balance" style="text-align: center; font-size: 1.2rem; margin-bottom: 1rem;">
+                Loading balance...
+            </div>
+            <div class="plans">
+                <div class="plan-card" data-amount="49" data-plan="Starter">
+                    <div class="plan-amount">₹49</div>
+                    <div class="plan-desc">Starter Plan</div>
+                </div>
+                <div class="plan-card" data-amount="99" data-plan="Pro">
+                    <div class="plan-amount">₹99</div>
+                    <div class="plan-desc">Pro Plan</div>
+                </div>
+                <div class="plan-card" data-amount="149" data-plan="Elite">
+                    <div class="plan-amount">₹149</div>
+                    <div class="plan-desc">Elite Plan</div>
+                </div>
+            </div>
+            <div id="profile-section" style="margin-top:1.2rem;"></div>
+        </div>
+        <div id="screen-profile" style="display:none;">
+            <h1>Profile</h1>
+            <div style="margin-top:2rem;">
+                <p id="profile-info">Loading...</p>
+            </div>
+        </div>
+    </div>
+    <div class="navbar">
+        <button class="navbar-btn active" id="nav-home" onclick="showScreen('home')">
+            <span class="icon">🏠</span>
+            Home
+        </button>
+        <button class="navbar-btn" id="nav-deposit" onclick="showScreen('deposit')">
+            <span class="icon">💰</span>
+            Deposit
+        </button>
+        <button class="navbar-btn" id="nav-profile" onclick="showScreen('profile')">
+            <span class="icon">👤</span>
+            Profile
+        </button>
+    </div>
+    <script src="home.js"></script>
 </body>
 </html>
