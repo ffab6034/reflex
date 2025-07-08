@@ -3,10 +3,10 @@ git commit -m "updated v7"
 git push
 
 
-git checkout -b reflex_v7
+git checkout -b reflex_v8
 git add .
-git commit -m "reflex_v7 only html left" 
-git push origin reflex_v7
+git commit -m "reflex_v8 now smooth transation" 
+git push origin reflex_v8
 
 
 
