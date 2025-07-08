@@ -1,19 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Button Game</title>
-    <link rel="stylesheet" href="game.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Button Game</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Embedded CSS from game.css -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-container {
+      background: #fff;
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(76, 68, 182, 0.18);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      color: #764ba2;
+      margin-bottom: 1.2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      grid-template-rows: repeat(4, 60px);
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .grid-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1.5rem;
+      background: #e2e8f0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .grid-btn.red {
+      background: #e53e3e;
+      color: #fff;
+    }
+
+    .grid-btn.target {
+      background: #667eea;
+      color: #fff;
+    }
+
+    .grid-btn.emoji {
+      font-size: 2rem;
+    }
+
+    #game-message {
+      font-size: 1.1rem;
+      color: #764ba2;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .game-container {
+        padding: 1rem 0.3rem;
+        max-width: 98vw;
+      }
+
+      .grid {
+        grid-template-columns: repeat(4, 40px);
+        grid-template-rows: repeat(4, 40px);
+        gap: 7px;
+      }
+
+      .grid-btn, .grid-btn.emoji {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="game-container">
-        <h2>Tap the Red Button!</h2>
-        <div id="grid" class="grid"></div>
-        <div id="game-message"></div>
-    </div>
-    <script src="game1.js"></script>
+  <div class="game-container">
+    <h2>Tap the Red Button!</h2>
+    <div id="grid" class="grid"></div>
+    <div id="game-message"></div>
+  </div>
+
+  <!-- Game logic -->
+  <script src="game1.js"></script>
 </body>
 </html>
