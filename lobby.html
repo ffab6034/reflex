@@ -1,19 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lobby</title>
-    <link rel="stylesheet" href="lobby.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobby</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Flutter-style Lobby UI -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f8;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .appbar {
+      height: 64px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+    }
+
+    .lobby-container {
+      margin-top: 64px;
+      padding: 1.5rem 1rem 2rem;
+      max-width: 480px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    #lobby-title {
+      color: #333;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    #rooms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .room-card {
+      background: white;
+      border-radius: 14px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .room-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .room-id {
+      font-weight: bold;
+      font-size: 1.05rem;
+      color: #4a4a4a;
+    }
+
+    .room-status {
+      font-size: 0.9rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      background: #e0d6fb;
+      color: #5e35b1;
+    }
+
+    .room-players {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    .join-btn {
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      align-self: flex-end;
+    }
+
+    .join-btn:hover {
+      background: linear-gradient(90deg, #5a67d8, #6b46c1);
+      transform: scale(1.03);
+    }
+
+    #lobby-message {
+      margin-top: 1rem;
+      text-align: center;
+      color: #e53e3e;
+      font-size: 0.98rem;
+    }
+
+    @media (max-width: 600px) {
+      .lobby-container {
+        padding: 1rem 0.8rem;
+      }
+
+      .room-id {
+        font-size: 1rem;
+      }
+
+      .join-btn {
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="lobby-container">
-        <h2 id="lobby-title">Lobby</h2>
-        <div id="rooms-list"></div>
-        <div id="lobby-message"></div>
-    </div>
-    <script src="lobby.js"></script>
+  <!-- AppBar -->
+  <div class="appbar">Game Lobby</div>
+
+  <!-- Main Lobby Container -->
+  <div class="lobby-container">
+    <h2 id="lobby-title">Available Rooms</h2>
+    <div id="rooms-list"></div>
+    <div id="lobby-message"></div>
+  </div>
+
+  <!-- Lobby Logic -->
+  <script src="lobby.js"></script>
 </body>
 </html>
