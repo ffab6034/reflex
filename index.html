@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reflex-Tap | Login</title>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2b1055">
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -23,7 +27,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
     .login-container {
@@ -33,120 +36,72 @@
       width: 100%;
       max-width: 360px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      text-align: center;
       animation: fadeInUp 0.8s ease-out;
     }
 
     @keyframes fadeInUp {
-      0% {
-        transform: translateY(50px);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     h2 {
-      text-align: center;
       color: #2b1055;
       margin-bottom: 2rem;
       font-size: 1.8rem;
       letter-spacing: 1px;
     }
 
-    .input-group {
-      margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-
-    input[type="text"],
-    input[type="tel"] {
+    #google-login {
       width: 100%;
-      padding: 0.85rem 1rem;
+      padding: 0.9rem 1rem;
       font-size: 1rem;
-      border: 2px solid #e2e2e2;
+      font-weight: 600;
+      background: #ffffff;
+      border: 1px solid #ccc;
       border-radius: 12px;
-      transition: all 0.3s ease;
-      background-color: #fafafa;
-    }
-
-    input:focus {
-      border-color: #667eea;
-      background-color: #fff;
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 0.9rem;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      font-weight: bold;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       transition: all 0.3s ease;
     }
 
-    button[type="submit"]:hover {
+    #google-login img {
+      width: 20px;
+      height: 20px;
+    }
+
+    #google-login:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(118, 75, 162, 0.4);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     #message {
-      text-align: center;
       margin-top: 1.2rem;
       font-size: 0.95rem;
+      color: #444;
     }
 
     @media (max-width: 500px) {
-      .login-container {
-        padding: 2rem 1rem;
-        border-radius: 18px;
-      }
-
-      h2 {
-        font-size: 1.6rem;
-      }
-
-      input,
-      button {
-        font-size: 1rem;
-      }
+      .login-container { padding: 2rem 1rem; }
+      h2 { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <form id="loginForm" class="login-form">
-      <h2>Reflex-Tap</h2>
-
-      <div class="input-group">
-        <label for="name">Your Name</label>
-        <input type="text" id="name" required placeholder="Enter your name" />
-      </div>
-
-      <div class="input-group">
-        <label for="phone">Phone Number</label>
-        <input type="tel" id="phone" required pattern="[0-9]{10}" placeholder="10-digit phone number" />
-      </div>
-
-      <button type="submit">Login</button>
-      <div id="message"></div>
-    </form>
+    <h2>Reflex-Tap</h2>
+    <button id="google-login">
+      <img src="https://developers.google.com/identity/images/g-logo.png" alt="G" />
+      Sign in with Google
+    </button>
+    <div id="message"></div>
   </div>
 
   <script>
-    // Firebase Configuration
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
       authDomain: "reflex-tap-7815f.firebaseapp.com",
@@ -158,50 +113,59 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const loginForm = document.getElementById('loginForm');
     const messageDiv = document.getElementById('message');
+    const googleBtn = document.getElementById('google-login');
 
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-
-      if (!/^\d{10}$/.test(phone)) {
-        messageDiv.style.color = "#e53e3e";
-        messageDiv.textContent = "Please enter a valid 10-digit phone number.";
-        return;
-      }
-
+    // Google Sign-In
+    googleBtn.addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        const query = await db.collection('logins').where('phone', '==', phone).limit(1).get();
-        let userId;
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+        const { displayName, email, photoURL, uid } = user;
 
-        if (!query.empty) {
-          userId = query.docs[0].id;
-          await db.collection('logins').doc(userId).update({ name });
-        } else {
-          const docRef = await db.collection('logins').add({
-            name,
-            phone,
+        // Save to Firestore if new user
+        const userRef = db.collection("logins").doc(uid);
+        const snapshot = await userRef.get();
+
+        if (!snapshot.exists) {
+          await userRef.set({
+            name: displayName,
+            email,
+            photoURL,
             balance: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          userId = docRef.id;
         }
 
-        localStorage.setItem('userId', userId);
+        // Store userId
+        localStorage.setItem('userId', uid);
         messageDiv.style.color = "#38a169";
         messageDiv.textContent = "Login successful! Redirecting...";
 
         setTimeout(() => window.location.href = "home.html", 1000);
-      } catch (error) {
-        console.error("Login error:", error);
+      } catch (err) {
+        console.error(err);
         messageDiv.style.color = "#e53e3e";
         messageDiv.textContent = "Login failed. Try again.";
       }
     });
+
+    // Auto login if already signed in
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        localStorage.setItem("userId", user.uid);
+        window.location.href = "home.html";
+      }
+    });
+
+    // PWA - Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(console.error);
+    }
   </script>
 </body>
 </html>
