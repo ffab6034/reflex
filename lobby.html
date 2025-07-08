@@ -214,7 +214,7 @@
 
     async function fetchRooms() {
       const roomsRef = db.collection('games').doc(gameType).collection('rooms');
-const snap = await roomsRef.orderBy('createdAt', 'desc').get();
+      const snap = await roomsRef.orderBy('createdAt', 'desc').limit(10).get();
       const rooms = snap.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(room => room.status === 'waiting');

@@ -3,136 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Number Game</title>
+  <title>Reflex-Tap: Number Game</title>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- Embedded Styles -->
+  <!-- Styles -->
   <style>
     :root {
-      --primary: #764ba2;
-      --secondary: #667eea;
+      --primary: #7F00FF;
+      --secondary: #E100FF;
+      --accent: #ffe600;
       --white: #ffffff;
       --gray: #e2e8f0;
+      --dark: #1a1a2e;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .game-container {
-      background: var(--white);
-      width: 100%;
-      max-width: 440px;
+      background: #fff;
+      border-radius: 22px;
       padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
       text-align: center;
     }
 
     .app-bar {
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
       color: var(--white);
-      font-size: 1.4rem;
       padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 1rem;
+      font-size: 1.4rem;
       font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-radius: 14px;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      letter-spacing: 0.5px;
     }
 
-    .game-container h2 {
+    h2 {
       font-size: 1.2rem;
-      margin: 1rem 0;
       color: var(--primary);
+      margin: 0.8rem 0;
+    }
+
+    #target-number {
+      font-size: 1.5rem;
+      color: var(--accent);
+      font-weight: bold;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 60px);
-      grid-template-rows: repeat(4, 60px);
-      gap: 14px;
+      grid-template-columns: repeat(4, 64px);
+      grid-gap: 16px;
       justify-content: center;
-      margin-top: 1.2rem;
+      margin-top: 1.5rem;
     }
 
     .grid-btn {
-      width: 60px;
-      height: 60px;
-      font-size: 1.4rem;
+      width: 64px;
+      height: 64px;
+      font-size: 1.3rem;
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
       background-color: var(--gray);
       cursor: pointer;
-      transition: all 0.2s;
+      font-weight: bold;
+      color: #333;
+      transition: all 0.2s ease;
     }
 
     .grid-btn.target {
       background: var(--secondary);
-      color: var(--white);
-      font-weight: bold;
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     }
 
     .grid-btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
     #game-message {
       font-size: 1rem;
-      margin-top: 1.2rem;
       color: var(--primary);
+      margin-top: 1.5rem;
+      min-height: 2rem;
     }
 
     @media (max-width: 600px) {
-      .game-container {
-        padding: 1rem;
-        border-radius: 16px;
-      }
-
-      .app-bar {
-        font-size: 1.1rem;
-        padding: 0.8rem;
-      }
-
       .grid {
-        grid-template-columns: repeat(4, 40px);
-        grid-template-rows: repeat(4, 40px);
-        gap: 8px;
+        grid-template-columns: repeat(4, 50px);
+        grid-gap: 10px;
       }
 
       .grid-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.1rem;
-        border-radius: 10px;
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+        border-radius: 12px;
+      }
+
+      .game-container {
+        padding: 1.2rem;
+        border-radius: 18px;
+      }
+
+      .app-bar {
+        font-size: 1.2rem;
+        padding: 0.8rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <div class="app-bar">Number Game</div>
+    <div class="app-bar">🎯 Reflex-Tap: Number Game</div>
     <h2>Tap the Number: <span id="target-number">--</span></h2>
     <div id="grid" class="grid"></div>
     <div id="game-message"></div>
   </div>
 
-  <!-- Embedded Script -->
+  <!-- Game Script -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCpZUZ_V-m1i71hB58T3QHKcapL_qs_49M",
       authDomain: "reflex-tap-7815f.firebaseapp.com",
       projectId: "reflex-tap-7815f",
-      storageBucket: "reflex-tap-7815f.firebasestorage.app",
+      storageBucket: "reflex-tap-7815f.appspot.com",
       messagingSenderId: "833157218846",
       appId: "1:833157218846:web:77bbf1c73b299004a1e40f",
       measurementId: "G-ZDHDZJ7J0B"
@@ -219,8 +240,8 @@
     function showResultsDialog() {
       const dialog = document.createElement('div');
       dialog.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;`;
-      dialog.innerHTML = `<div style="background:#fff;padding:2em 1.5em;border-radius:16px;min-width:280px;text-align:center;">
-          <div id="leaderboard-content">Waiting for all players...</div>
+      dialog.innerHTML = `<div style="background:#fff;padding:2em 1.5em;border-radius:18px;min-width:280px;text-align:center;">
+          <div id="leaderboard-content">⏳ Waiting for all players...</div>
       </div>`;
       document.body.appendChild(dialog);
 
@@ -240,13 +261,13 @@
               snapshot.forEach(doc => nameMap[doc.id] = doc.data().name || doc.id);
               const entries = Object.entries(results).filter(([uid]) => userIds.includes(uid)).sort((a,b) => a[1] - b[1]);
               const winner = entries[0];
-              let html = `<b>Game Over!</b><br><br>`;
+              let html = `<b>🏁 Game Over!</b><br><br>`;
               html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
               html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
               entries.forEach(([uid, time], i) => {
                 html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${i+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
               });
-              html += `</table><br><button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
+              html += `</table><br><button id="back-lobby-btn" style="padding:0.6em 1.4em;border-radius:10px;background:var(--primary);color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
               document.getElementById('leaderboard-content').innerHTML = html;
 
               let timer = 5;
@@ -266,37 +287,7 @@
 
     function showResults(results) {
       const msgDiv = document.getElementById('game-message');
-      if (!results) {
-        msgDiv.textContent = "Game Over!";
-        return;
-      }
-      const userIds = Object.keys(results);
-      db.collection('logins').where(firebase.firestore.FieldPath.documentId(), 'in', userIds.slice(0,10)).get()
-        .then(snapshot => {
-          const nameMap = {};
-          snapshot.forEach(doc => nameMap[doc.id] = doc.data().name || doc.id);
-          const entries = Object.entries(results).sort((a, b) => a[1] - b[1]);
-          const winner = entries[0];
-          let html = `<b>Game Over!</b><br><br>`;
-          html += `<div style="font-size:1.1em;font-weight:bold;color:#38a169;">🏆 Winner: ${nameMap[winner[0]] || winner[0]} (${winner[1]} ms)</div><br>`;
-          html += `<table style="margin:0 auto;"><tr><th>Rank</th><th>Name</th><th>Time (ms)</th></tr>`;
-          entries.forEach(([uid, time], i) => {
-            html += `<tr${uid === userId ? ' style="font-weight:bold;color:#764ba2;"' : ''}><td>${i+1}</td><td>${nameMap[uid] || uid}</td><td>${time}</td></tr>`;
-          });
-          html += `</table><br><button id="back-lobby-btn" style="padding:0.5em 1.2em;border-radius:8px;background:#764ba2;color:#fff;font-weight:bold;border:none;cursor:pointer;">Back to Lobby (<span id="back-timer">5</span>s)</button>`;
-          msgDiv.innerHTML = html;
-
-          let timer = 5;
-          const interval = setInterval(() => {
-            timer--;
-            document.getElementById('back-timer').textContent = timer;
-            if (timer <= 0) {
-              clearInterval(interval);
-              window.location.href = "home.html";
-            }
-          }, 1000);
-          document.getElementById('back-lobby-btn').onclick = () => window.location.href = "home.html";
-        });
+      msgDiv.textContent = "🎮 Game Over!";
     }
 
     setupGame();
