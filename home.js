@@ -208,3 +208,12 @@ if (userId) {
 } else {
     window.location.href = 'index.html'; // Redirect if not logged in
 }
+
+
+// ===== TAB NAVIGATION =====
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const gameType = tab.getAttribute('data-game');
+        window.location.href = `lobby.html?gameType=${gameType}`;
+    });
+});
