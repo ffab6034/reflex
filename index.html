@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- PWA Support -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2b1055">
   <link rel="apple-touch-icon" href="icon-192.png" />
@@ -112,6 +112,7 @@
       measurementId: "G-ZDHDZJ7J0B"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -119,7 +120,7 @@
     const messageDiv = document.getElementById('message');
     const googleBtn = document.getElementById('google-login');
 
-    // Google Sign-In
+    // Sign in with Google
     googleBtn.addEventListener('click', async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
@@ -127,7 +128,6 @@
         const user = result.user;
         const { displayName, email, photoURL, uid } = user;
 
-        // Save to Firestore if new user
         const userRef = db.collection("logins").doc(uid);
         const snapshot = await userRef.get();
 
@@ -141,20 +141,19 @@
           });
         }
 
-        // Store userId
-        localStorage.setItem('userId', uid);
+        localStorage.setItem("userId", uid);
         messageDiv.style.color = "#38a169";
         messageDiv.textContent = "Login successful! Redirecting...";
 
         setTimeout(() => window.location.href = "home.html", 1000);
       } catch (err) {
-        console.error(err);
+        console.error("Sign-in Error:", err.message);
         messageDiv.style.color = "#e53e3e";
-        messageDiv.textContent = "Login failed. Try again.";
+        messageDiv.textContent = "Login failed: " + err.message;
       }
     });
 
-    // Auto login if already signed in
+    // Auto-login if already signed in
     auth.onAuthStateChanged(user => {
       if (user) {
         localStorage.setItem("userId", user.uid);
@@ -162,10 +161,11 @@
       }
     });
 
-    // PWA - Service Worker
+    // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(console.error);
     }
   </script>
 </body>
 </html>
+    

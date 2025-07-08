@@ -1,24 +1,12 @@
-const CACHE_NAME = "reflextap-cache-v1";
-const urlsToCache = [
-  "index.html",
-  "home.html",
-  "lobby.html",
-  "game1.html",
-  "game2.html",
-  "game3.html",
-  "manifest.json",
-  "icon-192.png",
-  "icon-512.png"
-];
-
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
+self.addEventListener('install', (e) => {
+  console.log('Service Worker Installed');
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
-  );
+self.addEventListener('activate', (e) => {
+  console.log('Service Worker Activated');
+});
+
+self.addEventListener('fetch', (e) => {
+  // Optionally handle fetch events
 });

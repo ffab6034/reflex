@@ -1,11 +1,10 @@
 {
-  "name": "ReflexTap",
+  "name": "Reflex-Tap",
   "short_name": "ReflexTap",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#2b1055",
-  "theme_color": "#764ba2",
-  "orientation": "portrait",
+  "theme_color": "#2b1055",
   "icons": [
     {
       "src": "icon-192.png",
